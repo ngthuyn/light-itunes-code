@@ -11,6 +11,10 @@ export async function getStats(): Promise<Stats> {
     cache: "no-store",
   });
 
+  if (!res.ok) {
+    throw new Error("Không thể lấy thống kê.");
+  }
+
   return await res.json();
 }
 
@@ -19,33 +23,44 @@ export async function getClaims(): Promise<Claim[]> {
     cache: "no-store",
   });
 
+  if (!res.ok) {
+    throw new Error("Không thể lấy danh sách claims.");
+  }
+
   return await res.json();
 }
 
-export async function login(password:string){
+export async function login(password: string) {
+  const res = await fetch(
+    `${API}?action=login&password=${encodeURIComponent(password)}`
+  );
 
-    const res=
-    await fetch(
+  if (!res.ok) {
+    throw new Error("Đăng nhập thất bại.");
+  }
 
-        `${API}?action=login&password=${encodeURIComponent(password)}`
-
-    );
-
-    return await res.json();
-
+  return await res.json();
 }
+
 export async function claimCode(
-    fandom:string,
-    email:string
-){
+  fandom: string,
+  email: string
+): Promise<ClaimResponse & { claimCount?: number }> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedFandom = fandom.trim();
 
-    const res=
-    await fetch(
+  const res = await fetch(
+    `${API}?action=claim&fandom=${encodeURIComponent(
+      normalizedFandom
+    )}&email=${encodeURIComponent(normalizedEmail)}`,
+    {
+      cache: "no-store",
+    }
+  );
 
-`${API}?action=claim&fandom=${encodeURIComponent(fandom)}&email=${encodeURIComponent(email)}`
+  if (!res.ok) {
+    throw new Error("Không thể nhận code.");
+  }
 
-    );
-
-    return await res.json();
-
+  return await res.json();
 }
