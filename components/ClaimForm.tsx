@@ -7,16 +7,13 @@ import { Copy, Gift, Check } from "lucide-react";
 export default function ClaimForm() {
   const [fandom, setFandom] = useState("");
   const [email, setEmail] = useState("");
-  const [claimedEmail, setClaimedEmail] = useState("");
   const [code, setCode] = useState("");
-  const [claimCount, setClaimCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   async function handleClaim() {
     if (!fandom.trim()) {
-      alert("Vui lòng nhập tên fandom.");
+      alert("Vui lòng nhập tên Threads/Fandom.");
       return;
     }
 
@@ -36,6 +33,7 @@ export default function ClaimForm() {
     }
 
     setLoading(true);
+    setCopied(false);
 
     try {
       const result = await claimCode(
@@ -44,28 +42,26 @@ export default function ClaimForm() {
       );
 
       if (result.success) {
-        // Code vừa được cấp
         setCode(result.code ?? "");
 
-        // Email đã dùng để nhận code
-        setClaimedEmail(normalizedEmail);
-
-        // Tổng số code email này đã nhận
-        setClaimCount(Number(result.claimCount ?? 1));
-
-        // Hiển thị thông báo thành công
-        setShowSuccess(true);
-        setCopied(false);
-
-        // Xóa form
         setFandom("");
         setEmail("");
+
+        // Cập nhật FanWall ngay lập tức
+        window.dispatchEvent(
+          new Event("claim-success")
+        );
       } else {
-        alert(result.message || "Không thể nhận code.");
+        alert(
+          result.message || "Không thể nhận code."
+        );
       }
     } catch (err) {
       console.error("claim code error:", err);
-      alert("Không thể kết nối tới máy chủ.");
+
+      alert(
+        "Không thể kết nối tới máy chủ."
+      );
     } finally {
       setLoading(false);
     }
@@ -75,145 +71,229 @@ export default function ClaimForm() {
     if (!code) return;
 
     try {
-      await navigator.clipboard.writeText(code);
+      /*
+       * Clipboard API
+       * Hoạt động tốt trên HTTPS / Vercel
+       */
+      if (
+        navigator.clipboard &&
+        window.isSecureContext
+      ) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        /*
+         * Fallback cho HTTP local network
+         * Ví dụ:
+         * http://192.168.1.xxx:3000
+         */
+        const textarea =
+          document.createElement("textarea");
+
+        textarea.value = code;
+
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        textarea.style.opacity = "0";
+
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(
+          0,
+          textarea.value.length
+        );
+
+        const successful =
+          document.execCommand("copy");
+
+        document.body.removeChild(textarea);
+
+        if (!successful) {
+          throw new Error(
+            "Fallback copy failed"
+          );
+        }
+      }
+
       setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch (err) {
-      console.error("copy code error:", err);
-      alert("Không thể sao chép code.");
+      console.error(
+        "copy code error:",
+        err
+      );
+
+      alert(
+        "Không thể tự động sao chép. Vui lòng nhấn giữ code để sao chép."
+      );
     }
   }
 
-  function closeSuccess() {
-    setShowSuccess(false);
-    setCode("");
-    setClaimedEmail("");
-    setClaimCount(0);
-    setCopied(false);
-
-    // Cập nhật dữ liệu sau khi đóng
-    window.location.reload();
-  }
-
   return (
-    <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white p-8 shadow-xl shadow-rose-100">
+    <div className="w-full rounded-3xl border border-[#66303d] bg-[#2b1a20] p-8 shadow-xl shadow-black/20">
 
       {/* TITLE */}
       <div className="mb-8 flex items-center justify-center gap-3">
-        <Gift size={28} />
+        <Gift
+          size={26}
+          strokeWidth={2}
+          className="text-[#d68a9a]"
+        />
 
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-2xl font-bold text-[#f3e7e9]">
           Nhận iTunes Code
         </h2>
       </div>
 
-      {/* FORM */}
-      <div className="space-y-5">
+      {/* TWO COLUMNS */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-        {/* FANDOM */}
-        <input
-          value={fandom}
-          onChange={(e) => setFandom(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !loading) {
-              handleClaim();
-            }
-          }}
-          placeholder="Tên fandom"
-          className="w-full rounded-xl border border-stone-300 p-4 outline-none transition focus:border-stone-700"
-        />
+        {/* =====================================
+            LEFT - FORM
+        ===================================== */}
+        <div className="rounded-2xl border border-[#66303d] bg-[#321d24] p-6">
+          <div className="space-y-5">
 
-        {/* EMAIL */}
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !loading) {
-              handleClaim();
-            }
-          }}
-          placeholder="Email"
-          className="w-full rounded-xl border border-stone-300 p-4 outline-none transition focus:border-stone-700"
-        />
+            {/* FANDOM */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-[#d8c5c9]">
+                Tên bạn/Tên Fandom
+              </label>
 
-        {/* CLAIM BUTTON */}
-        <button
-          onClick={handleClaim}
-          disabled={loading}
-          className="w-full rounded-xl bg-rose-500 py-4 text-lg font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading
-            ? "Đang lấy code..."
-            : "🎁 Nhận iTunes Code"}
-        </button>
-      </div>
+              <input
+                type="text"
+                value={fandom}
+                onChange={(e) =>
+                  setFandom(e.target.value)
+                }
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !loading
+                  ) {
+                    handleClaim();
+                  }
+                }}
+                placeholder="Tên bạn/Tên Fandom"
+                disabled={loading}
+                className="w-full rounded-xl border border-[#713746] bg-[#24151a] p-4 text-sm text-[#f5e8eb] outline-none transition placeholder:text-[#aa8c94] focus:border-[#c52f52] focus:ring-1 focus:ring-[#c52f52] disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </div>
 
-      {/* SUCCESS */}
-      {showSuccess && (
-        <div className="mt-8 rounded-2xl border border-green-300 bg-green-50 p-6">
+            {/* EMAIL */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-[#d8c5c9]">
+                Email
+              </label>
 
-          {/* EMAIL */}
-          <p className="break-all text-center text-base font-medium text-stone-600">
-            📧 {claimedEmail}
-          </p>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !loading
+                  ) {
+                    handleClaim();
+                  }
+                }}
+                placeholder="Email"
+                disabled={loading}
+                className="w-full rounded-xl border border-[#713746] bg-[#24151a] p-4 text-sm text-[#f5e8eb] outline-none transition placeholder:text-[#aa8c94] focus:border-[#c52f52] focus:ring-1 focus:ring-[#c52f52] disabled:cursor-not-allowed disabled:opacity-60"
+              />
+            </div>
 
-          {/* SUCCESS MESSAGE */}
-          <p className="mt-2 text-center text-xl font-bold text-green-700">
-            🎉 Đã nhận code thành công
-          </p>
+            {/* CLAIM BUTTON */}
+            <button
+              type="button"
+              onClick={handleClaim}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c52f52] py-4 text-base font-bold text-white transition hover:bg-[#d63b5d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Gift size={20} />
 
-          {/* CLAIM COUNT */}
-          <p className="mt-2 text-center text-base font-semibold text-stone-700">
-            📦 Email này đã nhận tổng cộng{" "}
-            <span className="font-bold text-rose-600">
-              {claimCount} code
-            </span>
-          </p>
+              {loading
+                ? "Đang lấy code..."
+                : "Nhận iTunes Code"}
+            </button>
 
-          {/* THANK YOU */}
-          <h4 className="mt-3 text-center text-sm font-bold leading-6 text-green-700">
-            Cảm ơn bạn đã ủng hộ bài hát mới của lighT 💗
-            <br />
-            Chúc bạn nghe nhạc thật vui nhé!
-          </h4>
-
-          {/* CODE */}
-          <div className="mt-5 rounded-xl bg-white p-4 shadow">
-            <p className="break-all text-center font-mono text-2xl font-bold tracking-widest">
-              {code}
-            </p>
           </div>
-
-          {/* COPY */}
-          <button
-            onClick={copyCode}
-            disabled={!code}
-            className={`mx-auto mt-5 flex items-center gap-2 rounded-xl px-5 py-3 text-white transition ${
-              copied
-                ? "bg-green-600"
-                : "bg-stone-800 hover:bg-black"
-            } disabled:cursor-not-allowed disabled:opacity-60`}
-          >
-            {copied ? (
-              <Check size={18} />
-            ) : (
-              <Copy size={18} />
-            )}
-
-            {copied
-              ? "Đã sao chép"
-              : "Copy Code"}
-          </button>
-
-          {/* CLOSE */}
-          <button
-            onClick={closeSuccess}
-            className="mt-4 w-full rounded-xl border border-stone-300 py-3 font-semibold transition hover:bg-stone-100"
-          >
-            Đóng
-          </button>
         </div>
-      )}
+
+        {/* =====================================
+            RIGHT - CURRENT CODE
+        ===================================== */}
+        <div className="rounded-2xl border border-[#66303d] bg-[#321d24] p-6">
+
+          {code ? (
+            <div className="flex h-full flex-col">
+
+              <p className="mb-3 text-sm font-semibold text-[#d8c5c9]">
+                🎁 CODE CỦA BẠN
+              </p>
+
+              {/* CODE */}
+              <div className="rounded-xl border border-[#5c2a36] bg-[#211217] p-4">
+                <p className="break-all text-center font-mono text-xl font-bold tracking-widest text-[#f0dfe3]">
+                  {code}
+                </p>
+              </div>
+
+              {/* COPY */}
+              <button
+                type="button"
+                onClick={copyCode}
+                className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition ${
+                  copied
+                    ? "bg-[#5c2634]"
+                    : "bg-[#32171e] hover:bg-[#47202a]"
+                }`}
+              >
+                {copied ? (
+                  <Check size={18} />
+                ) : (
+                  <Copy size={18} />
+                )}
+
+                {copied
+                  ? "Đã sao chép"
+                  : "Copy Code"}
+              </button>
+
+            </div>
+          ) : (
+            /* =================================
+               EMPTY CODE STATE
+            ================================= */
+            <div className="flex min-h-[280px] items-center justify-center text-center text-[#927b81]">
+
+              <div>
+                <Gift
+                  size={32}
+                  className="mx-auto mb-4 opacity-50"
+                />
+
+                <p className="text-sm leading-7">
+                  Code của bạn sẽ xuất hiện ở đây
+                  <br />
+                  sau khi bấm nhận code.
+                </p>
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Tabs from "@/components/Tabs";
 import ClaimForm from "@/components/ClaimForm";
+import FanWall from "@/components/FanWall";
 import Dashboard from "@/components/Dashboard";
 import LoginModal from "@/components/LoginModal";
 
@@ -20,7 +21,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#fff4f5]">
+    <main className="min-h-screen">
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
         {/* Header */}
@@ -38,8 +39,9 @@ export default function Home() {
 
         {/* Content */}
         {tab === "claim" ? (
-          <div className="mx-auto mt-7 w-full max-w-2xl">
+          <div className="mx-auto mt-7 w-full max-w-3xl space-y-7">
             <ClaimForm />
+            <FanWall />
           </div>
         ) : (
           <div className="mx-auto mt-7 w-full max-w-5xl">

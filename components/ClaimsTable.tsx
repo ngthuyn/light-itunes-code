@@ -10,24 +10,28 @@ export default function ClaimsTable() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-  async function load() {
-    try {
-      const data = await getClaims();
-      setClaims(data);
-    } catch (err) {
-      console.error(err);
+    async function load() {
+      try {
+        const data = await getClaims();
+        setClaims(data);
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }
 
-  load();
-}, []);
+    load();
+  }, []);
+
   const filtered = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
+
     return claims.filter((item) => {
-      const keyword = search.toLowerCase();
+      const fandom = String(item.fandom ?? "").toLowerCase();
+      const email = String(item.email ?? "").toLowerCase();
 
       return (
-        item.fandom.toLowerCase().includes(keyword) ||
-        item.email.toLowerCase().includes(keyword)
+        fandom.includes(keyword) ||
+        email.includes(keyword)
       );
     });
   }, [claims, search]);
@@ -52,13 +56,21 @@ export default function ClaimsTable() {
 
             <tr>
 
-              <th className="p-3 text-left">Fandom</th>
+              <th className="p-3 text-left">
+                Fandom
+              </th>
 
-              <th className="text-left">Email</th>
+              <th className="text-left">
+                Email
+              </th>
 
-              <th className="text-left">Code</th>
+              <th className="text-left">
+                Code
+              </th>
 
-              <th className="text-left">Time</th>
+              <th className="text-left">
+                Time
+              </th>
 
             </tr>
 
@@ -74,20 +86,20 @@ export default function ClaimsTable() {
               >
 
                 <td className="p-4 font-semibold">
-
                   {item.fandom}
-
                 </td>
 
-                <td>{item.email}</td>
+                <td>
+                  {item.email}
+                </td>
 
                 <td className="font-mono">
-
                   {item.code}
-
                 </td>
 
-                <td>{item.time}</td>
+                <td>
+                  {item.time}
+                </td>
 
               </tr>
 

@@ -52,7 +52,7 @@ ${tab==="admin"
 
 `}>
 
-📊 Quản lý
+📊 Admin only
 
 </button>
 

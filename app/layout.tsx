@@ -3,13 +3,13 @@ import { Nunito } from "next/font/google";
 import "./globals.css";
 
 const nunito = Nunito({
+  subsets: ["latin", "vietnamese"],
   variable: "--font-nunito",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "lighT iTunes Code",
-  description: "Support lighT's new song - Nhận iTunes Code",
+  title: "Vết Thương - lighT",
+  description: "Support lighT's new song",
 };
 
 export default function RootLayout({
@@ -18,11 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${nunito.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang="vi">
+      <body className={`${nunito.variable} font-sans`}>
         {children}
       </body>
     </html>
