@@ -43,16 +43,14 @@ export async function login(password: string) {
 }
 
 export async function claimCode(
-  fandom: string,
-  email: string
-): Promise<ClaimResponse & { claimCount?: number }> {
-  const normalizedEmail = email.trim().toLowerCase();
+  fandom: string
+): Promise<ClaimResponse> {
   const normalizedFandom = fandom.trim();
 
   const res = await fetch(
     `${API}?action=claim&fandom=${encodeURIComponent(
       normalizedFandom
-    )}&email=${encodeURIComponent(normalizedEmail)}`,
+    )}`,
     {
       cache: "no-store",
     }

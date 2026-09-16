@@ -6,7 +6,6 @@ import { Copy, Gift, Check } from "lucide-react";
 
 export default function ClaimForm() {
   const [fandom, setFandom] = useState("");
-  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -17,40 +16,18 @@ export default function ClaimForm() {
       return;
     }
 
-    if (!email.trim()) {
-      alert("Vui lòng nhập email.");
-      return;
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const emailRegex =
-      /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-
-    if (!emailRegex.test(normalizedEmail)) {
-      alert("Email không hợp lệ.");
-      return;
-    }
-
     setLoading(true);
     setCopied(false);
 
     try {
-      const result = await claimCode(
-        fandom.trim(),
-        normalizedEmail
-      );
+      const result = await claimCode(fandom.trim());
 
       if (result.success) {
         setCode(result.code ?? "");
-
         setFandom("");
-        setEmail("");
 
         // Cập nhật FanWall ngay lập tức
-        window.dispatchEvent(
-          new Event("claim-success")
-        );
+        window.dispatchEvent(new Event("claim-success"));
       } else {
         alert(
           result.message || "Không thể nhận code."
@@ -71,26 +48,16 @@ export default function ClaimForm() {
     if (!code) return;
 
     try {
-      /*
-       * Clipboard API
-       * Hoạt động tốt trên HTTPS / Vercel
-       */
       if (
         navigator.clipboard &&
         window.isSecureContext
       ) {
         await navigator.clipboard.writeText(code);
       } else {
-        /*
-         * Fallback cho HTTP local network
-         * Ví dụ:
-         * http://192.168.1.xxx:3000
-         */
         const textarea =
           document.createElement("textarea");
 
         textarea.value = code;
-
         textarea.style.position = "fixed";
         textarea.style.left = "-9999px";
         textarea.style.top = "0";
@@ -135,31 +102,36 @@ export default function ClaimForm() {
   }
 
   return (
-    <div className="w-full rounded-3xl border border-[#66303d] bg-[#2b1a20] p-8 shadow-xl shadow-black/20">
+    <div className="mx-auto w-full max-w-3xl rounded-3xl border border-[#66303d] bg-[#2b1a20] p-5 shadow-xl shadow-black/20 md:p-6">
 
-      {/* TITLE */}
-      <div className="mb-8 flex items-center justify-center gap-3">
+      {/* =========================
+          TITLE
+      ========================== */}
+      <div className="mb-6 flex items-center justify-center gap-3">
         <Gift
-          size={26}
+          size={24}
           strokeWidth={2}
           className="text-[#d68a9a]"
         />
 
-        <h2 className="text-2xl font-bold text-[#f3e7e9]">
+        <h2 className="text-xl font-bold text-[#f3e7e9] md:text-2xl">
           Nhận iTunes Code
         </h2>
       </div>
 
-      {/* TWO COLUMNS */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {/* =========================
+          TWO COLUMNS
+      ========================== */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-        {/* =====================================
+        {/* =========================
             LEFT - FORM
-        ===================================== */}
-        <div className="rounded-2xl border border-[#66303d] bg-[#321d24] p-6">
-          <div className="space-y-5">
+        ========================== */}
+        <div className="h-[230px] rounded-2xl border border-[#66303d] bg-[#321d24] p-4">
 
-            {/* FANDOM */}
+          <div className="space-y-4">
+
+            {/* NAME / FANDOM */}
             <div>
               <label className="mb-2 block text-sm font-semibold text-[#d8c5c9]">
                 Tên bạn/Tên Fandom
@@ -181,33 +153,7 @@ export default function ClaimForm() {
                 }}
                 placeholder="Tên bạn/Tên Fandom"
                 disabled={loading}
-                className="w-full rounded-xl border border-[#713746] bg-[#24151a] p-4 text-sm text-[#f5e8eb] outline-none transition placeholder:text-[#aa8c94] focus:border-[#c52f52] focus:ring-1 focus:ring-[#c52f52] disabled:cursor-not-allowed disabled:opacity-60"
-              />
-            </div>
-
-            {/* EMAIL */}
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-[#d8c5c9]">
-                Email
-              </label>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                onKeyDown={(e) => {
-                  if (
-                    e.key === "Enter" &&
-                    !loading
-                  ) {
-                    handleClaim();
-                  }
-                }}
-                placeholder="Email"
-                disabled={loading}
-                className="w-full rounded-xl border border-[#713746] bg-[#24151a] p-4 text-sm text-[#f5e8eb] outline-none transition placeholder:text-[#aa8c94] focus:border-[#c52f52] focus:ring-1 focus:ring-[#c52f52] disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-xl border border-[#713746] bg-[#24151a] px-3.5 py-3 text-sm text-[#f5e8eb] outline-none transition placeholder:text-[#aa8c94] focus:border-[#c52f52] focus:ring-1 focus:ring-[#c52f52] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
 
@@ -216,9 +162,9 @@ export default function ClaimForm() {
               type="button"
               onClick={handleClaim}
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c52f52] py-4 text-base font-bold text-white transition hover:bg-[#d63b5d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#c52f52] py-3.5 text-sm font-bold text-white transition hover:bg-[#d63b5d] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Gift size={20} />
+              <Gift size={18} />
 
               {loading
                 ? "Đang lấy code..."
@@ -228,21 +174,22 @@ export default function ClaimForm() {
           </div>
         </div>
 
-        {/* =====================================
-            RIGHT - CURRENT CODE
-        ===================================== */}
-        <div className="rounded-2xl border border-[#66303d] bg-[#321d24] p-6">
+        {/* =========================
+            RIGHT - CODE
+        ========================== */}
+        <div className="h-[230px] rounded-2xl border border-[#66303d] bg-[#321d24] p-4">
 
           {code ? (
             <div className="flex h-full flex-col">
 
+              {/* CODE TITLE */}
               <p className="mb-3 text-sm font-semibold text-[#d8c5c9]">
                 🎁 CODE CỦA BẠN
               </p>
 
               {/* CODE */}
               <div className="rounded-xl border border-[#5c2a36] bg-[#211217] p-4">
-                <p className="break-all text-center font-mono text-xl font-bold tracking-widest text-[#f0dfe3]">
+                <p className="break-all text-center font-mono text-lg font-bold tracking-widest text-[#f0dfe3]">
                   {code}
                 </p>
               </div>
@@ -251,16 +198,16 @@ export default function ClaimForm() {
               <button
                 type="button"
                 onClick={copyCode}
-                className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition ${
+                className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition ${
                   copied
                     ? "bg-[#5c2634]"
                     : "bg-[#32171e] hover:bg-[#47202a]"
                 }`}
               >
                 {copied ? (
-                  <Check size={18} />
+                  <Check size={17} />
                 ) : (
-                  <Copy size={18} />
+                  <Copy size={17} />
                 )}
 
                 {copied
@@ -270,18 +217,17 @@ export default function ClaimForm() {
 
             </div>
           ) : (
-            /* =================================
-               EMPTY CODE STATE
-            ================================= */
-            <div className="flex min-h-[280px] items-center justify-center text-center text-[#927b81]">
+
+            /* EMPTY STATE */
+            <div className="flex h-full items-center justify-center text-center text-[#927b81]">
 
               <div>
                 <Gift
-                  size={32}
-                  className="mx-auto mb-4 opacity-50"
+                  size={30}
+                  className="mx-auto mb-3 opacity-50"
                 />
 
-                <p className="text-sm leading-7">
+                <p className="text-sm leading-6">
                   Code của bạn sẽ xuất hiện ở đây
                   <br />
                   sau khi bấm nhận code.
