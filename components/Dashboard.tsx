@@ -5,7 +5,11 @@ import type { Claim } from "@/types";
 import { getClaims } from "@/lib/api";
 import SearchBar from "./SearchBar";
 
-export default function ClaimsTable() {
+type Props = {
+  onLogout: () => void;
+};
+
+export default function ClaimsTable({ onLogout }: Props) {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [search, setSearch] = useState("");
 
@@ -35,10 +39,20 @@ export default function ClaimsTable() {
   return (
     <div className="rounded-3xl bg-white p-6 text-stone-800 shadow-xl">
 
-      {/* TITLE */}
-      <h2 className="mb-5 text-2xl font-bold text-stone-800">
-        Người đã nhận code
-      </h2>
+      {/* TITLE + LOGOUT */}
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <h2 className="text-2xl font-bold text-stone-800">
+          Người đã nhận code
+        </h2>
+
+        <button
+          type="button"
+          onClick={onLogout}
+          className="rounded-xl bg-stone-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-black"
+        >
+          Đăng xuất
+        </button>
+      </div>
 
       {/* SEARCH */}
       <div className="text-stone-800">

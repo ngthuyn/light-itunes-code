@@ -20,6 +20,11 @@ export default function Home() {
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("admin");
+    setIsAdmin(false);
+  };
+
   return (
     <main className="min-h-screen">
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -46,7 +51,7 @@ export default function Home() {
         ) : (
           <div className="mx-auto mt-7 w-full max-w-5xl">
             {isAdmin ? (
-              <Dashboard />
+              <Dashboard onLogout={handleLogout} />
             ) : (
               <LoginModal
                 onSuccess={() => setIsAdmin(true)}
