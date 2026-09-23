@@ -14,9 +14,11 @@ export default function Header() {
           priority
         />
       </div>
-
+        <p className="mt-5 text-xl text-[#a96a78]">
+        Hệ thống sẽ bắt đầu phát code vào 19:15 ngày 24.09.2026!
+      </p>
       {/* VẾT THƯƠNG */}
-      <div className="mt-5 flex justify-center">
+      <div className="mt-3 flex justify-center">
         <Image
           src="/vet_thuong.png"
           alt="VẾT THƯƠNG"
